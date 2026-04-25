@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../constants.dart';
 import '../models/setup_state.dart';
 import '../providers/setup_provider.dart';
 import 'dashboard_screen.dart';
@@ -23,7 +22,7 @@ class _SetupWizardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Consumer<SetupProvider>(
           builder: (context, provider, _) {
@@ -54,11 +53,7 @@ class _SetupWizardContent extends StatelessWidget {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: const Color(0xFF6B4EFF),
             borderRadius: BorderRadius.circular(20),
           ),
           child: const Icon(
@@ -73,16 +68,16 @@ class _SetupWizardContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
-        Text(
+        const Text(
           'The self-improving AI agent for Android',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.black54,
           ),
           textAlign: TextAlign.center,
         ),
@@ -111,7 +106,7 @@ class _SetupWizardContent extends StatelessWidget {
         const Icon(
           Icons.android,
           size: 80,
-          color: AppColors.accent,
+          color: Color(0xFF6B4EFF),
         ),
         const SizedBox(height: 30),
         const Text(
@@ -119,16 +114,16 @@ class _SetupWizardContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Colors.black87,
           ),
         ),
         const SizedBox(height: 15),
-        Text(
+        const Text(
           'This will install Hermes Agent on your device.\n'
           'Requires ~500MB of storage space.',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.black54,
           ),
           textAlign: TextAlign.center,
         ),
@@ -155,7 +150,7 @@ class _SetupWizardContent extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () => provider.startSetup(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: const Color(0xFF6B4EFF),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -176,14 +171,14 @@ class _SetupWizardContent extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6B4EFF)),
         ),
         const SizedBox(height: 30),
         Text(
           provider.state.currentMessage,
           style: const TextStyle(
             fontSize: 18,
-            color: Colors.white,
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),
@@ -192,16 +187,16 @@ class _SetupWizardContent extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: LinearProgressIndicator(
             value: provider.state.progress,
-            backgroundColor: AppColors.surface,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
+            backgroundColor: Colors.grey[200],
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6B4EFF)),
           ),
         ),
         const SizedBox(height: 10),
         Text(
           '${(provider.state.progress * 100).toInt()}%',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.black54,
           ),
         ),
       ],
@@ -216,13 +211,13 @@ class _SetupWizardContent extends StatelessWidget {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.2),
+            color: Colors.green.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.check_circle,
             size: 60,
-            color: AppColors.success,
+            color: Colors.green,
           ),
         ),
         const SizedBox(height: 30),
@@ -231,15 +226,15 @@ class _SetupWizardContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Colors.black87,
           ),
         ),
         const SizedBox(height: 15),
-        Text(
+        const Text(
           'Hermes Agent is ready to use.',
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.black54,
           ),
         ),
         const SizedBox(height: 40),
@@ -255,7 +250,7 @@ class _SetupWizardContent extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: const Color(0xFF6B4EFF),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -279,13 +274,13 @@ class _SetupWizardContent extends StatelessWidget {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            color: AppColors.error.withOpacity(0.2),
+            color: Colors.red.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.error_outline,
             size: 60,
-            color: AppColors.error,
+            color: Colors.red,
           ),
         ),
         const SizedBox(height: 30),
@@ -294,15 +289,15 @@ class _SetupWizardContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Colors.black87,
           ),
         ),
         const SizedBox(height: 15),
         Text(
           provider.state.errorMessage ?? 'An unknown error occurred',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.black54,
           ),
           textAlign: TextAlign.center,
         ),
@@ -313,7 +308,7 @@ class _SetupWizardContent extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () => provider.reset(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: const Color(0xFF6B4EFF),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -351,10 +346,10 @@ class _FeatureItem extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.2),
+              color: const Color(0xFF6B4EFF).withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: const Color(0xFF6B4EFF)),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -366,14 +361,14 @@ class _FeatureItem extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.black87,
                   ),
                 ),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.black54,
                   ),
                 ),
               ],
