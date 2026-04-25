@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class AppConstants {
   static const String appName = 'Hermes Agent';
   static const String appVersion = '1.0.0';

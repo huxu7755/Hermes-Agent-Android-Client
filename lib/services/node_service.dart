@@ -5,7 +5,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 class NodeService {
   static const String _wsUrl = 'ws://localhost:18789/api/node';
-  
+
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
   final _messageController = StreamController<Map<String, dynamic>>.broadcast();
@@ -15,7 +15,7 @@ class NodeService {
   Future<void> connect() async {
     try {
       _channel = WebSocketChannel.connect(Uri.parse(_wsUrl));
-      
+
       _subscription = _channel!.stream.listen(
         (data) {
           final decoded = json.decode(data as String) as Map<String, dynamic>;
@@ -29,7 +29,7 @@ class NodeService {
         },
       );
 
-      await _sendHandshake();
+      _sendHandshake();
     } catch (e) {
       throw Exception('Failed to connect to node: $e');
     }
@@ -41,23 +41,23 @@ class NodeService {
     _channel = null;
   }
 
-  Future<void> _sendHandshake() async {
+  void _sendHandshake() {
     final handshake = {
       'type': 'handshake',
       'version': '1.0.0',
       'capabilities': ['camera', 'flash', 'location', 'screen', 'sensor', 'haptic'],
     };
-    await _channel?.sink.add(json.encode(handshake));
+    _channel?.sink.add(json.encode(handshake));
   }
 
-  Future<void> sendCommand(String command, Map<String, dynamic> params) async {
+  void sendCommand(String command, Map<String, dynamic> params) {
     final message = {
       'type': 'command',
       'command': command,
       'params': params,
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
     };
-    await _channel?.sink.add(json.encode(message));
+    _channel?.sink.add(json.encode(message));
   }
 
   Future<bool> requestPermission(String permission) async {
@@ -94,12 +94,12 @@ class NodeService {
   Future<Map<String, dynamic>?> invoke(String capability, String command, Map<String, dynamic> params) async {
     try {
       sendCommand('$capability.$command', params);
-      
+
       final response = await messages.first.timeout(
         const Duration(seconds: 10),
         onTimeout: () => <String, dynamic>{'error': 'Timeout'},
       );
-      
+
       return response;
     } catch (e) {
       return {'error': e.toString()};

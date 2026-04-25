@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:xterm/xterm.dart';
 import '../constants.dart';
 
 class TerminalScreen extends StatefulWidget {
@@ -10,21 +9,56 @@ class TerminalScreen extends StatefulWidget {
 }
 
 class _TerminalScreenState extends State<TerminalScreen> {
-  late Terminal _terminal;
-  final _terminalController = TerminalController();
+  final _textController = TextEditingController();
+  final _scrollController = ScrollController();
+  final _focusNode = FocusNode();
+  final List<String> _outputLines = [];
+  String _currentInput = '';
 
   @override
   void initState() {
     super.initState();
-    _terminal = Terminal(
-      maxLines: 10000,
-    );
-    _setupTerminal();
+    _outputLines.add('Hermes Agent Terminal');
+    _outputLines.add('Type "hermes" to start chatting or "hermes --help" for commands');
+    _outputLines.add('');
   }
 
-  void _setupTerminal() {
-    _terminal.write('Hermes Agent Terminal\r\n');
-    _terminal.write('Type "hermes" to start chatting or "hermes --help" for commands\r\n\r\n\$ ');
+  void _handleSubmit(String value) {
+    setState(() {
+      _outputLines.add('\$ $value');
+      _currentInput = value;
+      if (value.trim().toLowerCase() == 'hermes') {
+        _outputLines.add('Starting hermes agent...');
+      } else if (value.trim().toLowerCase() == 'clear') {
+        _outputLines.clear();
+        _outputLines.add('Terminal cleared');
+      } else {
+        _outputLines.add('Command not found: $value');
+      }
+      _outputLines.add('');
+    });
+    _textController.clear();
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -38,8 +72,10 @@ class _TerminalScreenState extends State<TerminalScreen> {
           IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () {
-              _terminal.buffer.clear();
-              _setupTerminal();
+              setState(() {
+                _outputLines.clear();
+                _outputLines.add('Terminal cleared');
+              });
             },
           ),
           IconButton(
@@ -53,50 +89,74 @@ class _TerminalScreenState extends State<TerminalScreen> {
           Expanded(
             child: Container(
               color: const Color(0xFF1E1E1E),
-              padding: const EdgeInsets.all(8),
-              child: TerminalView(
-                _terminal,
-                controller: _terminalController,
-                autofocus: true,
-                backgroundOpacity: 1.0,
-                textStyle: const TerminalStyle(
-                  fontSize: 14,
-                  fontFamily: 'monospace',
-                ),
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(12),
+                itemCount: _outputLines.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                      _outputLines[index],
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
-          _buildToolbar(),
+          _buildInputArea(),
         ],
       ),
     );
   }
 
-  Widget _buildToolbar() {
+  Widget _buildInputArea() {
     return Container(
       color: AppColors.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          _ToolbarKey(label: 'Tab', onTap: () => _sendKey('\t')),
-          _ToolbarKey(label: 'Ctrl', onTap: () => _sendKey('\x03')),
-          _ToolbarKey(label: 'Esc', onTap: () => _sendKey('\x1B')),
-          _ToolbarKey(label: '↑', onTap: () => _sendKey('\x1B[A')),
-          _ToolbarKey(label: '↓', onTap: () => _sendKey('\x1B[B')),
-          _ToolbarKey(label: '→', onTap: () => _sendKey('\x1B[C')),
-          _ToolbarKey(label: '←', onTap: () => _sendKey('\x1B[D')),
-          const Spacer(),
+          const Text(
+            '\$ ',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 16,
+              color: AppColors.accent,
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              controller: _textController,
+              focusNode: _focusNode,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Type command...',
+                hintStyle: TextStyle(color: Colors.white38),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onSubmitted: _handleSubmit,
+              onChanged: (value) {
+                _currentInput = value;
+              },
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.keyboard, color: Colors.white70),
-            onPressed: () {},
+            icon: const Icon(Icons.send, color: AppColors.primary),
+            onPressed: () => _handleSubmit(_textController.text),
           ),
         ],
       ),
     );
-  }
-
-  void _sendKey(String key) {
-    _terminal.sendKey(key);
   }
 
   void _showHelp() {
@@ -110,13 +170,10 @@ class _TerminalScreenState extends State<TerminalScreen> {
           '  hermes          - Start interactive chat\n'
           '  hermes model    - Change model\n'
           '  hermes tools    - Configure tools\n'
-          '  hermes config    - View/edit config\n'
-          '  hermes gateway   - Start messaging gateway\n'
-          '  hermes doctor    - Diagnose issues\n\n'
-          'Keyboard shortcuts:\n'
-          '  Tab    - Autocomplete\n'
-          '  Ctrl+C - Interrupt\n'
-          '  Esc    - Cancel input',
+          '  hermes config   - View/edit config\n'
+          '  hermes gateway  - Start messaging gateway\n'
+          '  hermes doctor   - Diagnose issues\n'
+          '  clear           - Clear terminal',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -125,39 +182,6 @@ class _TerminalScreenState extends State<TerminalScreen> {
             child: const Text('Close'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ToolbarKey extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _ToolbarKey({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-          ),
-        ),
       ),
     );
   }
