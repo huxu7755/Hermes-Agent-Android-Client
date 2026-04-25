@@ -15,13 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clone hermes-agent submodule
-        run: |
-          git clone --depth 1 https://github.com/NousResearch/hermes-agent.git ../hermes-agent-submodule
-          mv ../hermes-agent-submodule/* ./
-          mv ../hermes-agent-submodule/.* . 2>/dev/null || true
-          rm -rf ../hermes-agent-submodule
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -49,23 +42,14 @@ jobs:
         run: flutter build apk --release
         timeout-minutes: 30
 
-      - name: Upload APK artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: hermes-agent-apk
-          path: |
-            build/app/outputs/flutter-apk/app-debug.apk
-            build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 7
-
-      - name: Upload debug APK to workflow run
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 7
 
-      - name: Upload release APK to workflow run
+      - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
